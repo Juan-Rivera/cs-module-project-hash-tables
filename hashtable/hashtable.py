@@ -29,8 +29,9 @@ class HashTable:
             self.capacity = MIN_CAPACITY
 
         # creating a table that has exact amount of indexes depending on the capacity.
-        self.table = [None] * self.capacity 
-        print(f"Hash Table: {self.table}")
+        self.table = [HashTableEntry(None, None)] * self.capacity
+        self.count = 0
+        
 
     def get_num_slots(self):
         """
@@ -53,6 +54,7 @@ class HashTable:
         Implement this.
         """
         # Your code here
+        return self.count / self.capacity
 
     def fnv1(self, key):
         """
@@ -94,10 +96,29 @@ class HashTable:
         Implement this.
         """
         # Your code here
+        self.count += 1
         # using the DJB2 hashing algorithm to insert the value as a key for the index in the hash table.
         index = self.hash_index(key)
-        self.table[index] = value
-        print(self.table)
+        current = self.table[index]
+
+        # if theres nothing in the slot we are inserting it here
+        if self.table[index] is None:
+            self.table[index] = HashTableEntry(key,value)
+        # going through the index's slots to find and open one 
+        else:
+            # while loop to traverse through the table
+            while current.next is not None:
+                # checking to see if the index key already exists with our key
+                if current.key == key:
+                    # overwrite value with new value 
+                    current.value = value
+                    # print(current.value)
+                # if key is not the same, current is now updated to the next index in line
+                current = current.next
+            current.next = HashTableEntry(key, value)
+        #print(self.count)
+                
+        
 
     def delete(self, key):
         """
@@ -108,13 +129,28 @@ class HashTable:
         Implement this.
         """
         # Your code here
+        self.count -= 1
+
         index = self.hash_index(key)
+        current = self.table[index]
+        # checking to see if theres anything in the index location
+        if self.table[index]:
+            # while loop to traverse through indexes
+            while current is not None:
+                # checking to see if current key matches with given key
+                if current.key == key:
+                    # sets the current value as none (deleted)
+                    current.value = None
+                    #print(current.value)
+                current = current.next
+        else:
+            return None
 
         # checking to see if the index we are looking at has a key or if its not none
-        if self.table[index] is not None:
-            self.table[index] = None
-        else:
-            print("Key not found")
+        # if self.table[index] is not None:
+        #     self.table[index] = None
+        # else:
+        #     print("Key not found")
 
     def get(self, key):
         """
@@ -125,8 +161,25 @@ class HashTable:
         Implement this.
         """
         # Your code here
+        # get the index of the key 
         index = self.hash_index(key)
-        return self.table[index]
+
+        current = self.table[index]
+        # searching through linked list to find key
+
+        # checks current key and if it matches it will return the value
+        if current.key == key:
+            return current.value
+        
+        # while loop to traverse through linked list so that it will keep checking each index in the linked 
+        # list and returns the value once the key is found or returns NONE if not found
+        while current.next is not None:
+            current = current.next
+
+            if current.key == key:
+                return current.value
+        
+        return None
 
     def resize(self, new_capacity):
         """
@@ -136,6 +189,27 @@ class HashTable:
         Implement this.
         """
         # Your code here
+
+        # duplicates current table to use later
+        old_table = self.table.copy()
+        #print(f"This is the OLD TABLE: {old_table}")
+
+        # setting the capacity to given new capacity
+        self.capacity = new_capacity
+
+        # rehashing table to have new capacity included
+        self.table = [HashTableEntry(None, None)] * self.capacity
+        #print(f"This is the NEW TABLE: {self.table}")
+        
+        # using the PUT method to insert the data we already had from old_table
+        for i in range(len(old_table)):
+            current = old_table[i]
+
+            while current is not None:
+                if current.key is not None:
+                    self.put(current.key, current.value)
+                current = current.next
+
 
 
 
@@ -162,14 +236,14 @@ if __name__ == "__main__":
         print(ht.get(f"line_{i}"))
 
     # Test resizing
-    # old_capacity = ht.get_num_slots()
-    # ht.resize(ht.capacity * 2)
-    # new_capacity = ht.get_num_slots()
+    old_capacity = ht.get_num_slots()
+    ht.resize(ht.capacity * 2)
+    new_capacity = ht.get_num_slots()
 
-    # print(f"\nResized from {old_capacity} to {new_capacity}.\n")
+    print(f"\nResized from {old_capacity} to {new_capacity}.\n")
 
-    # # Test if data intact after resizing
-    # for i in range(1, 13):
-    #     print(ht.get(f"line_{i}"))
+    # Test if data intact after resizing
+    for i in range(1, 13):
+        print(ht.get(f"line_{i}"))
 
     print("")
