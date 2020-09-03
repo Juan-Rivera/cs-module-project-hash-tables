@@ -1,6 +1,5 @@
 # Your code here
 
-
 def slowfun_too_slow(x, y):
     v = math.pow(x, y)
     v = math.factorial(v)
@@ -15,7 +14,6 @@ def slowfun(x, y):
     output, but completes quickly instead of taking ages to run.
     """
     # Your code here
-
 
 
 # Do not modify below this line!
